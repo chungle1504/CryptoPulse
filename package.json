@@ -1,0 +1,38 @@
+{
+  "name": "cryptopulse",
+  "version": "1.0.0",
+  "description": "Full-stack crypto analytics website with real-time data",
+  "main": "server/index.js",
+  "scripts": {
+    "client": "npm run dev --prefix client",
+    "server": "npm start --prefix server",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-client": "npm install --prefix client",
+    "install-server": "npm install --prefix server",
+    "install-all": "npm run install-server && npm run install-client",
+    "build": "npm run build --prefix client",
+    "start": "npm run server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "analytics",
+    "react",
+    "express",
+    "mongodb",
+    "real-time",
+    "crypto",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/CryptoPulse.git"
+  }
+}
