@@ -20,11 +20,19 @@ function App() {
         if (!selectedCoin && data.data.length > 0) {
           setSelectedCoin(data.data[0]);
         }
+        
+        // Show rate limit message if using cached data
+        if (data.source === 'db_cache' && data.message) {
+          setError(data.message + ' (Using cached data)');
+        }
       } else {
-        setError(data.message || 'Failed to fetch coins');
+        const errorMessage = response.status === 429 
+          ? 'API rate limit reached. Data updates may be limited. (Getting a CoinGecko API key cost at least 100$/month.)'
+          : data.message || 'Failed to fetch coins';
+        setError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to connect to server');
+      setError('Failed to connect to server. Please check if the backend is running.');
       console.error('Error fetching coins:', err);
     } finally {
       setLoading(false);
@@ -34,8 +42,8 @@ function App() {
   useEffect(() => {
     fetchCoins();
     
-    // Fetch data every 30 seconds
-    const interval = setInterval(fetchCoins, 30000);
+    // Fetch data every 60 seconds
+    const interval = setInterval(fetchCoins, 60000);
     
     return () => clearInterval(interval);
   }, []);
@@ -77,14 +85,31 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <div className={`mb-6 border px-4 py-3 rounded-md ${
+            error.includes('rate limit') || error.includes('cached data')
+              ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}>
             <div className="flex">
               <div className="flex-shrink-0">
-                <span className="text-red-400">⚠️</span>
+                <span className={error.includes('rate limit') || error.includes('cached data') ? 'text-yellow-400' : 'text-red-400'}>
+                  {error.includes('rate limit') || error.includes('cached data') ? '⚠️' : '❌'}
+                </span>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium">Error</h3>
+                <h3 className="text-sm font-medium">
+                  {error.includes('rate limit') || error.includes('cached data') ? 'API Rate Limit Notice' : 'Error'}
+                </h3>
                 <div className="mt-2 text-sm">{error}</div>
+                {error.includes('rate limit') && (
+                  <div className="mt-2 text-xs">
+                    💡 To get unlimited API access, sign up for a free CoinGecko API key at{' '}
+                    <a href="https://www.coingecko.com/en/api/pricing" target="_blank" rel="noopener noreferrer" className="underline">
+                      coingecko.com/api
+                    </a>{' '}
+                    and add it to your server/.env file
+                  </div>
+                )}
               </div>
             </div>
           </div>

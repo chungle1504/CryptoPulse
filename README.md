@@ -5,10 +5,11 @@ A full-stack cryptocurrency analytics website that fetches real-time data from C
 ## 🚀 Features
 
 - **Real-time Data**: Live cryptocurrency prices and market data
-- **Interactive Charts**: Price charts with Chart.js
+- **Advanced Charts**: Line and candlestick charts with multiple timeframes (1m, 15m, 1h, 4h, 1d)
 - **Responsive Design**: Mobile-friendly interface with TailwindCSS
 - **Market Overview**: Top gainers, losers, and market statistics
 - **Auto-refresh**: Data updates every 30 seconds
+- **Interactive Analysis**: Binance-style chart controls and OHLC data
 - **Coin Details**: Detailed information for each cryptocurrency
 
 ## �️ Tech Stack
@@ -163,9 +164,11 @@ MONGODB_URI=mongodb://localhost:27017/cryptopulse
 
 ### PriceChart
 - Interactive price charts using Chart.js
-- 24-hour price simulation
+- Multiple chart types: Line charts and Candlestick charts
+- Multiple time intervals: 1m, 15m, 1h, 4h, 1d (like Binance)
+- Real-time data integration with CoinGecko API
 - Responsive and customizable
-- Hover tooltips
+- Hover tooltips with OHLC data for candlestick charts
 
 ## 🔄 Data Flow
 
