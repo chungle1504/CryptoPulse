@@ -127,9 +127,9 @@ const PriceChart = ({ selectedCoin, coins }) => {
         timeIncrement = 60 * 60 * 1000; // 1 hour
     }
 
-    for (let i = points - 1; i >= 0; i--) {
-      const time = new Date(now.getTime() - i * timeIncrement);
-      
+    for (let idx_point = points - 1; idx_point >= 0; idx_point--) {
+      const time = new Date(now.getTime() - idx_point * timeIncrement);
+      let reverse_idx = points - idx_point - 1;
       // Format time based on interval
       let timeLabel;
       if (timeInterval === '1m' || timeInterval === '15m') {
@@ -143,22 +143,32 @@ const PriceChart = ({ selectedCoin, coins }) => {
       labels.push(timeLabel);
       
       // Simulate price movement
-      const progress = (points - 1 - i) / (points - 1);
+      const progress = (points - 1 - idx_point) / (points - 1);
       const baseVariation = (Math.random() - 0.5) * 0.05; // ±2.5% random variation
       const trendVariation = (change24h / 100) * progress; // Apply 24h change over time
-      const priceAtTime = currentPrice * (1 + baseVariation + trendVariation);
-      
+      // console.log("Log: ", { baseVariation, trendVariation, progress });
+      // console.log("Price at time calculation:", data)
+      let priceAtTime = 0;
+      if (idx_point === 0) {
+        priceAtTime = currentPrice;
+      } else {
+        priceAtTime = currentPrice * (1 + baseVariation + trendVariation);
+      }
+
       data.push(Math.max(0, priceAtTime));
       
       // Generate candlestick data (OHLC)
       const basePrice = Math.max(0, priceAtTime);
       const volatility = basePrice * 0.02; // 2% volatility
-      
-      const open = basePrice + (Math.random() - 0.5) * volatility;
-      const close = basePrice + (Math.random() - 0.5) * volatility;
-      const high = Math.max(open, close) + Math.random() * volatility * 0.5;
-      const low = Math.min(open, close) - Math.random() * volatility * 0.5;
-      
+      let open, close, high, low;
+      close = basePrice;
+      if (idx_point === points - 1) {
+        open = basePrice + (Math.random() - 0.5) * volatility;
+      } else {
+        open = data[reverse_idx - 1];
+      }
+      high = Math.max(open, close) + Math.random() * volatility * 0.5;
+      low = Math.min(open, close) - Math.random() * volatility * 0.5;
       candlestickData.push({
         x: timeLabel,
         open: Math.max(0, open),
@@ -206,34 +216,15 @@ const PriceChart = ({ selectedCoin, coins }) => {
         ],
       };
     } else {
-      // Candlestick chart using bar chart with custom styling
+      // Candlestick chart - only candle bodies
       const candlestickData = data.candlestickData || [];
       return {
         labels: data.labels,
         datasets: [
-          {
-            label: 'High',
-            data: candlestickData.map(item => item.high),
-            backgroundColor: 'rgba(0,0,0,0)',
-            borderColor: 'rgba(0,0,0,0.3)',
-            borderWidth: 1,
-            type: 'line',
-            pointRadius: 0,
-            fill: false,
-          },
-          {
-            label: 'Low',
-            data: candlestickData.map(item => item.low),
-            backgroundColor: 'rgba(0,0,0,0)',
-            borderColor: 'rgba(0,0,0,0.3)',
-            borderWidth: 1,
-            type: 'line',
-            pointRadius: 0,
-            fill: false,
-          },
+          // Candle body
           {
             label: 'Open-Close',
-            data: candlestickData.map(item => [item.low, item.high]),
+            data: candlestickData.map(item => [Math.min(item.open, item.close), Math.max(item.open, item.close)]),
             backgroundColor: candlestickData.map(item => 
               item.close >= item.open ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'
             ),
@@ -465,8 +456,8 @@ const PriceChart = ({ selectedCoin, coins }) => {
               tooltip: {
                 ...options.plugins.tooltip,
                 filter: function(item) {
-                  // Only show tooltip for the Open-Close bar (the third dataset)
-                  return item.datasetIndex === 2;
+                  // Only show tooltip for the Open-Close bar (the first and only dataset now)
+                  return item.datasetIndex === 0;
                 },
                 callbacks: {
                   title: function(context) {
